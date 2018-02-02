@@ -11,10 +11,17 @@
  */
 'use strict';
 
+var deepDiffer = function(...args): bool {
+  if (global.__DEEP_DIFFER_OVERRIDE && typeof global.__DEEP_DIFFER_OVERRIDE === 'function') {
+    return global.__DEEP_DIFFER_OVERRIDE(deepDifferInternal, ...args);
+  }
+  return deepDifferInternal(...args);
+}
+
 /*
  * @returns {bool} true if different, false if equal
  */
-var deepDiffer = function(one: any, two: any): bool {
+var deepDifferInternal = function(one: any, two: any, ...args): bool {
   if (one === two) {
     // Short circuit on identical object references instead of traversing them.
     return false;
@@ -42,13 +49,13 @@ var deepDiffer = function(one: any, two: any): bool {
       return true;
     }
     for (var ii = 0; ii < len; ii++) {
-      if (deepDiffer(one[ii], two[ii])) {
+      if (deepDiffer(one[ii], two[ii], ...args)) {
         return true;
       }
     }
   } else {
     for (var key in one) {
-      if (deepDiffer(one[key], two[key])) {
+      if (deepDiffer(one[key], two[key], ...args)) {
         return true;
       }
     }

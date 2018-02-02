@@ -10,6 +10,34 @@
 
 var deepDiffer = require('deepDiffer');
 
+const cyclicObject = {};
+const cyclicObjectInside = {};
+cyclicObject.a = cyclicObjectInside;
+cyclicObjectInside.b = cyclicObject;
+cyclicObjectInside.c = 'foo';
+
+const cyclicObject2 = {};
+const cyclicObject2Inside = {};
+cyclicObject2.a = cyclicObject2Inside;
+cyclicObject2Inside.b = cyclicObject2;
+cyclicObject2Inside.c = 'foo';
+
+const cyclicObject3 = {};
+const cyclicObject3Inside = {};
+cyclicObject3.a = cyclicObject3Inside;
+cyclicObject3Inside.b = cyclicObject3;
+cyclicObject3Inside.c = 'bar';
+
+const cyclicDiffer = function(orgDiffer, one, two, seen = []) {
+  if (typeof one === 'object') {
+    if (seen.indexOf(one) !== -1) {
+      return false;
+    }
+    seen.push(one);
+  }
+  return orgDiffer(one, two, seen);
+};
+
 describe('deepDiffer', function() {
   it('should diff primitives of the same type', () => {
     expect(deepDiffer(1, 2)).toBe(true);
@@ -97,5 +125,15 @@ describe('deepDiffer', function() {
   it('should diff same object', () => {
     var obj = [1,[2,3]];
     expect(deepDiffer(obj, obj)).toBe(false);
+  });
+  it('throws without cyclical override', () => {
+    expect(() => {
+      deepDiffer(cyclicObject, cyclicObject2);
+    }).toThrow();
+  });
+  it('can diff cyclic objects with cyclical override', () => {
+    global.__DEEP_DIFFER_OVERRIDE = cyclicDiffer;
+    expect(deepDiffer(cyclicObject, cyclicObject2)).toBe(false);
+    expect(deepDiffer(cyclicObject, cyclicObject3)).toBe(true);
   });
 });
