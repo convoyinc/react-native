@@ -13,15 +13,15 @@
 
 var deepDiffer = function(...args): bool {
   if (global.__DEEP_DIFFER_OVERRIDE && typeof global.__DEEP_DIFFER_OVERRIDE === 'function') {
-    return global.__DEEP_DIFFER_OVERRIDE(deepDifferInternal, ...args);
+    return global.__DEEP_DIFFER_OVERRIDE(_deepDiffer, ...args);
   }
-  return deepDifferInternal(...args);
+  return _deepDiffer(...args);
 }
 
 /*
  * @returns {bool} true if different, false if equal
  */
-var deepDifferInternal = function(one: any, two: any, ...args): bool {
+var _deepDiffer = function(one: any, two: any, ...args): bool {
   if (one === two) {
     // Short circuit on identical object references instead of traversing them.
     return false;
