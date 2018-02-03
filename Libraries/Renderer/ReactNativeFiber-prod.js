@@ -3268,9 +3268,17 @@ var objects = {}, uniqueID = 1, emptyObject$3 = {}, ReactNativePropRegistry = fu
     }, ReactNativePropRegistry;
 }(), ReactNativePropRegistry_1 = ReactNativePropRegistry, emptyObject$2 = {}, removedKeys = null, removedKeyCount = 0;
 
-function defaultDiffer(prevProp, nextProp) {
-    console.log("Pin-Yen:RN_Fiber_prod");
+function defaultDiffer(prevProp, nextProp, context = {}) {
+  try {
     return "object" != typeof nextProp || null === nextProp || deepDiffer(prevProp, nextProp);
+  } catch (e) {
+    if (global.__DEEP_DIFFER_EXCEPTION_CALLBACK && typeof global.__DEEP_DIFFER_EXCEPTION_CALLBACK === "function") {
+      global.__DEEP_DIFFER_EXCEPTION_CALLBACK(e, {prevProp, nextProp, ...context});
+    }
+  }
+  // we get here if and only if deepDiffer throws, return false so that the
+  // cyclic object doesn't get added to the updatePayload for native component
+  return false;
 }
 
 function resolveObject(idOrObject) {

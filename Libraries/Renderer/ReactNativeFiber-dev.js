@@ -3682,7 +3682,7 @@ var objects = {}, uniqueID = 1, emptyObject$3 = {}, ReactNativePropRegistry = fu
     }, ReactNativePropRegistry;
 }(), ReactNativePropRegistry_1 = ReactNativePropRegistry, emptyObject$2 = {}, removedKeys = null, removedKeyCount = 0;
 
-function defaultDiffer(prevProp, nextProp) {
+function defaultDiffer(prevProp, nextProp, context = {}) {
     try {
       return "object" != typeof nextProp || null === nextProp || deepDiffer(prevProp, nextProp);
     } catch (e) {
