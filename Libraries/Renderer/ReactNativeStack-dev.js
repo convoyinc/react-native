@@ -2523,8 +2523,8 @@ function setNativePropsFiber(componentOrHandle, nativeProps) {
         maybeInstance = findNodeHandle_1(componentOrHandle);
     } catch (error) {}
     if (null != maybeInstance) {
-      var viewConfig = maybeInstance.viewConfig, updatePayload = ReactNativeAttributePayload_1.create(nativeProps, viewConfig.validAttributes);
-      UIManager.updateView(maybeInstance._nativeTag, viewConfig.uiViewClassName, updatePayload);
+        var viewConfig = maybeInstance.viewConfig, updatePayload = ReactNativeAttributePayload_1.create(nativeProps, viewConfig.validAttributes);
+        UIManager.updateView(maybeInstance._nativeTag, viewConfig.uiViewClassName, updatePayload);
     }
 }
 
