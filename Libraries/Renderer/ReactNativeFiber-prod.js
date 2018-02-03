@@ -3269,6 +3269,7 @@ var objects = {}, uniqueID = 1, emptyObject$3 = {}, ReactNativePropRegistry = fu
 }(), ReactNativePropRegistry_1 = ReactNativePropRegistry, emptyObject$2 = {}, removedKeys = null, removedKeyCount = 0;
 
 function defaultDiffer(prevProp, nextProp) {
+    console.log("Pin-Yen:RN_Fiber_prod");
     return "object" != typeof nextProp || null === nextProp || deepDiffer(prevProp, nextProp);
 }
 
@@ -3333,8 +3334,8 @@ function diffProperties(updatePayload, prevProps, nextProps, validAttributes) {
             var nextValue = "function" == typeof attributeConfig.process ? attributeConfig.process(nextProp) : nextProp;
             updatePayload[propKey] = nextValue;
         }
-    } else if (prevProp !== nextProp) if ("object" != typeof attributeConfig) defaultDiffer(prevProp, nextProp) && ((updatePayload || (updatePayload = {}))[propKey] = nextProp); else if ("function" == typeof attributeConfig.diff || "function" == typeof attributeConfig.process) {
-        var shouldUpdate = void 0 === prevProp || ("function" == typeof attributeConfig.diff ? attributeConfig.diff(prevProp, nextProp) : defaultDiffer(prevProp, nextProp));
+    } else if (prevProp !== nextProp) if ("object" != typeof attributeConfig) defaultDiffer(prevProp, nextProp, { validAttributes }) && ((updatePayload || (updatePayload = {}))[propKey] = nextProp); else if ("function" == typeof attributeConfig.diff || "function" == typeof attributeConfig.process) {
+        var shouldUpdate = void 0 === prevProp || ("function" == typeof attributeConfig.diff ? attributeConfig.diff(prevProp, nextProp) : defaultDiffer(prevProp, nextProp, { validAttributes }));
         shouldUpdate && (nextValue = "function" == typeof attributeConfig.process ? attributeConfig.process(nextProp) : nextProp, 
         (updatePayload || (updatePayload = {}))[propKey] = nextValue);
     } else removedKeys = null, removedKeyCount = 0, updatePayload = diffNestedProperty(updatePayload, prevProp, nextProp, attributeConfig), 
