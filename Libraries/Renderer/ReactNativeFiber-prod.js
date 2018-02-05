@@ -3268,8 +3268,17 @@ var objects = {}, uniqueID = 1, emptyObject$3 = {}, ReactNativePropRegistry = fu
     }, ReactNativePropRegistry;
 }(), ReactNativePropRegistry_1 = ReactNativePropRegistry, emptyObject$2 = {}, removedKeys = null, removedKeyCount = 0;
 
-function defaultDiffer(prevProp, nextProp) {
+function defaultDiffer(prevProp, nextProp, context) {
+  try {
     return "object" != typeof nextProp || null === nextProp || deepDiffer(prevProp, nextProp);
+  } catch (e) {
+    if ('__DEEP_DIFFER_EXCEPTION_CALLBACK' in global && typeof global.__DEEP_DIFFER_EXCEPTION_CALLBACK === "function") {
+      global.__DEEP_DIFFER_EXCEPTION_CALLBACK(e, Object.assign({prevProp, nextProp}, context));
+    }
+  }
+  // we get here if and only if deepDiffer throws, return false so that the
+  // cyclic object doesn't get added to the updatePayload for native component
+  return false;
 }
 
 function resolveObject(idOrObject) {
@@ -3333,8 +3342,8 @@ function diffProperties(updatePayload, prevProps, nextProps, validAttributes) {
             var nextValue = "function" == typeof attributeConfig.process ? attributeConfig.process(nextProp) : nextProp;
             updatePayload[propKey] = nextValue;
         }
-    } else if (prevProp !== nextProp) if ("object" != typeof attributeConfig) defaultDiffer(prevProp, nextProp) && ((updatePayload || (updatePayload = {}))[propKey] = nextProp); else if ("function" == typeof attributeConfig.diff || "function" == typeof attributeConfig.process) {
-        var shouldUpdate = void 0 === prevProp || ("function" == typeof attributeConfig.diff ? attributeConfig.diff(prevProp, nextProp) : defaultDiffer(prevProp, nextProp));
+    } else if (prevProp !== nextProp) if ("object" != typeof attributeConfig) defaultDiffer(prevProp, nextProp, { validAttributes }) && ((updatePayload || (updatePayload = {}))[propKey] = nextProp); else if ("function" == typeof attributeConfig.diff || "function" == typeof attributeConfig.process) {
+        var shouldUpdate = void 0 === prevProp || ("function" == typeof attributeConfig.diff ? attributeConfig.diff(prevProp, nextProp) : defaultDiffer(prevProp, nextProp, { validAttributes }));
         shouldUpdate && (nextValue = "function" == typeof attributeConfig.process ? attributeConfig.process(nextProp) : nextProp, 
         (updatePayload || (updatePayload = {}))[propKey] = nextValue);
     } else removedKeys = null, removedKeyCount = 0, updatePayload = diffNestedProperty(updatePayload, prevProp, nextProp, attributeConfig), 
