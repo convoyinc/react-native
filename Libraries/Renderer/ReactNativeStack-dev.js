@@ -2348,7 +2348,7 @@ function defaultDiffer(prevProp, nextProp, context) {
     return "object" != typeof nextProp || null === nextProp || deepDiffer(prevProp, nextProp);
   } catch (e) {
     if ('__DEEP_DIFFER_EXCEPTION_CALLBACK' in global && typeof global.__DEEP_DIFFER_EXCEPTION_CALLBACK === "function") {
-      global.__DEEP_DIFFER_EXCEPTION_CALLBACK(e, object.assign({prevProp, nextProp}, context));
+      global.__DEEP_DIFFER_EXCEPTION_CALLBACK(e, Object.assign({prevProp, nextProp}, context));
     }
   }
   // we get here if and only if deepDiffer throws, return false so that the
