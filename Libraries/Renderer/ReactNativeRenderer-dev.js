@@ -3185,14 +3185,24 @@ var emptyObject$1 = {};
 var removedKeys = null;
 var removedKeyCount = 0;
 
-function defaultDiffer(prevProp, nextProp) {
-  if (typeof nextProp !== "object" || nextProp === null) {
-    // Scalars have already been checked for equality
-    return true;
-  } else {
-    // For objects and arrays, the default diffing algorithm is a deep compare
-    return deepDiffer(prevProp, nextProp);
+function defaultDiffer(prevProp, nextProp, context) {
+  try {
+    if (typeof nextProp !== "object" || nextProp === null) {
+      // Scalars have already been checked for equality
+      return true;
+    } else {
+      // For objects and arrays, the default diffing algorithm is a deep compare
+      return deepDiffer(prevProp, nextProp);
+    }
+  } catch (e) {
+    if ('__DEEP_DIFFER_EXCEPTION_CALLBACK' in global && typeof global.__DEEP_DIFFER_EXCEPTION_CALLBACK === "function") {
+      global.__DEEP_DIFFER_EXCEPTION_CALLBACK(e, Object.assign({prevProp, nextProp}, context));
+    }
   }
+
+  // we get here if and only if deepDiffer throws, return false so that the
+  // cyclic object doesn't get added to the updatePayload for native component
+  return false;
 }
 
 function resolveObject(idOrObject) {
@@ -3494,7 +3504,7 @@ function diffProperties(updatePayload, prevProps, nextProps, validAttributes) {
     // Pattern match on: attributeConfig
     if (typeof attributeConfig !== "object") {
       // case: !Object is the default case
-      if (defaultDiffer(prevProp, nextProp)) {
+      if (defaultDiffer(prevProp, nextProp, { validAttributes })) {
         // a normal leaf has changed
         (updatePayload || (updatePayload = {}))[propKey] = nextProp;
       }
@@ -3507,7 +3517,7 @@ function diffProperties(updatePayload, prevProps, nextProps, validAttributes) {
         prevProp === undefined ||
         (typeof attributeConfig.diff === "function"
           ? attributeConfig.diff(prevProp, nextProp)
-          : defaultDiffer(prevProp, nextProp));
+          : defaultDiffer(prevProp, nextProp, { validAttributes }));
       if (shouldUpdate) {
         nextValue =
           typeof attributeConfig.process === "function"

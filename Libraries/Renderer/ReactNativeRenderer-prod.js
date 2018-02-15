@@ -1363,6 +1363,19 @@ function resolveObject(idOrObject) {
     ? ReactNativePropRegistry.getByID(idOrObject)
     : idOrObject;
 }
+function defaultDiffer(prevProp, nextProp, context) {
+  try {
+    return deepDiffer(prevProp, nextProp);
+  } catch (e) {
+    if ('__DEEP_DIFFER_EXCEPTION_CALLBACK' in global && typeof global.__DEEP_DIFFER_EXCEPTION_CALLBACK === "function") {
+      global.__DEEP_DIFFER_EXCEPTION_CALLBACK(e, Object.assign({prevProp, nextProp}, context));
+    }
+  }
+
+  // we get here if and only if deepDiffer throws, return false so that the
+  // cyclic object doesn't get added to the updatePayload for native component
+  return false;
+}
 function restoreDeletedValuesInNestedArray(
   updatePayload,
   node,
@@ -1520,7 +1533,7 @@ function diffProperties(updatePayload, prevProps, nextProps, validAttributes) {
         if ("object" !== typeof attributeConfig)
           ("object" !== typeof nextProp ||
             null === nextProp ||
-            deepDiffer(prevProp, nextProp)) &&
+            defaultDiffer(prevProp, nextProp, { validAttributes })) &&
             ((updatePayload || (updatePayload = {}))[propKey] = nextProp);
         else if (
           "function" === typeof attributeConfig.diff ||
@@ -1532,7 +1545,7 @@ function diffProperties(updatePayload, prevProps, nextProps, validAttributes) {
               ? attributeConfig.diff(prevProp, nextProp)
               : "object" !== typeof nextProp ||
                 null === nextProp ||
-                deepDiffer(prevProp, nextProp))
+                defaultDiffer(prevProp, nextProp, { validAttributes }))
           )
             (attributeConfig =
               "function" === typeof attributeConfig.process
